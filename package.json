@@ -21,6 +21,7 @@
   ],
   "types": "types",
   "scripts": {
+    "dtslint": "dtslint --localTs node_modules/typescript/lib types",
     "lint": "eslint lib --ignore-path .gitignore",
     "pretty": "prettier --check --ignore-path .gitignore lib",
     "test": "NODE_ENV=test jest"
@@ -33,6 +34,7 @@
   ],
   "devDependencies": {
     "@types/jest": "^27.0.1",
+    "dtslint": "^4.1.4",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jest": "^24.4.0",
