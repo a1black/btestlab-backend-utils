@@ -2,6 +2,24 @@
 
 interface BTLabUtils {
   errors: BTLabUtils.Errors;
+  misc: {
+    /**
+     * Returns new object with entries that pass the test.
+     * @param value Object to filter.
+     * @param callbackFn Function to test each value in the object, if not provided function removes empty values from the object.
+     */
+    filterObject<T = {[key: string]: any}>(value: T, callbackFn?: (value: any) => boolean): T;
+    /**
+     * Returns `true` if `value` is nullish or empty.
+     * @param value Value to check.
+     */
+    isEmpty(value: any): value is null;
+    /**
+     * Returns random hex encoded string.
+     * @param length Length of generated string.
+     */
+    uid(length: number): string;
+  };
 }
 
 declare namespace BTLabUtils {
