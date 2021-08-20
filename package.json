@@ -1,0 +1,49 @@
+{
+  "name": "btestlab-backend-utils",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Functions and classes used by other components of btestlab ecosystem.",
+  "author": "a1black",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "btestlab",
+    "utils"
+  ],
+  "repository": "github:a1black/btestlab-backend-utils",
+  "homepage": "https://github.com/a1black/btestlab-backend-utils#readme",
+  "bugs": {
+    "url": "https://github.com/a1black/btestlab-backend-utils/issues"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "types/index.d.ts"
+  ],
+  "types": "types",
+  "scripts": {
+    "lint": "eslint lib --ignore-path .gitignore",
+    "pretty": "prettier --check --ignore-path .gitignore lib",
+    "test": "NODE_ENV=test jest"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "os": [
+    "linux"
+  ],
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^24.4.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "jest": "^27.0.6",
+    "pre-commit": "^1.2.2",
+    "prettier": "^2.3.2"
+  },
+  "pre-commit": [
+    "pretty",
+    "lint"
+  ]
+}
