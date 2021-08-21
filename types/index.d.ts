@@ -1,7 +1,13 @@
 // TypeScript Version: 4.3
 
 interface BTLabUtils {
-  errors: BTLabUtils.Errors;
+  errors: {
+    BaseError: typeof BTLabUtils.BaseError;
+    OperationNotAllowedError: typeof BTLabUtils.OperationNotAllowedError;
+    RecordNotFoundError: typeof BTLabUtils.RecordNotFoundError;
+    RuntimeError: typeof BTLabUtils.RuntimeError;
+    ValidationError: typeof BTLabUtils.ValidationError;
+  };
   misc: {
     /**
      * Returns new object with entries that pass the test.
@@ -19,6 +25,9 @@ interface BTLabUtils {
      * @param length Length of generated string.
      */
     uid(length: number): string;
+  };
+  service: {
+    ServiceResponseBuilder: typeof BTLabUtils.ServiceResponseBuilder;
   };
 }
 
@@ -60,12 +69,51 @@ declare namespace BTLabUtils {
     options: ValidationErrorOptions | undefined;
   }
 
-  interface Errors {
-    BaseError: typeof BaseError;
-    OperationNotAllowedError: typeof OperationNotAllowedError;
-    RecordNotFoundError: typeof RecordNotFoundError;
-    RuntimeError: typeof RuntimeError;
-    ValidationError: typeof ValidationError;
+  class ServiceResponseBuilder<In = { [key: string]: any }, Out = { [key: string]: any }> {
+    /** Sets list of action that can be performed on the response document. */
+    allow(...actions: string[]): this;
+    /** Sets document or list of documents returned by the server. */
+    document(document: In | In[]): this;
+    /**
+     * Sets error messages occured during validation of user's input.
+     * @param error Error message.
+     * @param details List of errors where each item is `[error_key, error_message]`.
+     */
+    error(error: string, details?: string[][]): this;
+    /**
+     * Sets error messages occured during validation of user's input.
+     * @param error Instance of validation error.
+     */
+    error(error: ValidationError | Error): this;
+    /** Indicates that server failed to complete user's request. */
+    fail(): this;
+    /** Sets list of action that cannot be performed on the response document. */
+    forbid(...actions: string[]): this;
+    /** Sets response message. */
+    message(message: string): this;
+    /** Returns response object. */
+    produce(): ServiceResponse<Out>;
+    /** Indicates that server successfully completed user's request. */
+    success(): this;
+    /** Sets access token issued by the authorization server. */
+    token(token: string): this;
+  }
+
+  interface ServiceResponse<Doc> {
+    /** Access token. */
+    accessToken?: string;
+    /** List of permitted operations on the response document(s). */
+    allowed?: string[];
+    /** Data returned by services that operate on a single document. */
+    doc?: Doc;
+    /** Validation errors. */
+    errors?: { [key: string]: any };
+    /** List of documents. */
+    list?: Array<{ actions?: string[], doc: Doc }>;
+    /** Response message. */
+    message?: string;
+    /** Indicates whether request completed or failed. */
+    ok?: boolean;
   }
 }
 

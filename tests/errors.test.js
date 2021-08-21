@@ -45,7 +45,7 @@ describe('ValidationError constructor', () => {
     })
   })
 
-  test('constructor `details` isnot an array, expect undefined', () => {
+  test('constructor `details` is not an array, expect undefined', () => {
     const error = new ValidationError('error', options, options)
     expect(error).toMatchObject({
       details: undefined,
