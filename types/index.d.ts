@@ -1,11 +1,11 @@
 // TypeScript Version: 4.3
 
-import mongodb = require('mongodb')
+import mongodb = require('mongodb');
 
 interface BTLabUtils {
   db: {
     AbstractCollectionWithHistory: typeof BTLabUtils.AbstractCollectionWithHistory;
-  }
+  };
   errors: {
     BaseError: typeof BTLabUtils.BaseError;
     OperationNotAllowedError: typeof BTLabUtils.OperationNotAllowedError;
@@ -152,12 +152,11 @@ declare namespace BTLabUtils {
     updateDeletedField(id: any, state: boolean): Promise<boolean>;
     /**
      * Updates existing document using values in the `updateData`.
-     * @param id Unique identifier.
-     * @param updateData Partial document that contains new values for provided fields, or `null` for fields that need to be deleted.
+     * @param partialDOcument Partial document that contains new values for provided fields, or `null` for fields that need to be deleted.
      * @throws {RecordNotFoundError}
      * @throws {RuntimeError}
      */
-    updateDocument(id: any, updateData: DocumentDiff): Promise<boolean>;
+    updateDocument(partialDocument: TSchema): Promise<boolean>;
   }
   /** Partial document. */
   interface DocumentDiff {
@@ -189,7 +188,6 @@ declare namespace BTLabUtils {
   interface ValidationErrorOptions {
     [key: string]: any;
   }
-
 }
 
 declare const utils: BTLabUtils;

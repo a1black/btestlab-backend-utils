@@ -66,3 +66,6 @@ collection.author({
 });
 collection.collection().find();
 throw collection.notFoundError();
+collection.replaceDocument({_id: 1, name: 2}).then(console.log);
+collection.updateDeletedField(1, true).then(console.log);
+collection.updateDocument({_id: 1, name: null}).then(console.log);
