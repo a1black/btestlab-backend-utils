@@ -1,6 +1,11 @@
 // TypeScript Version: 4.3
 
+import mongodb = require('mongodb')
+
 interface BTLabUtils {
+  db: {
+    AbstractCollectionWithHistory: typeof BTLabUtils.AbstractCollectionWithHistory;
+  }
   errors: {
     BaseError: typeof BTLabUtils.BaseError;
     OperationNotAllowedError: typeof BTLabUtils.OperationNotAllowedError;
@@ -32,10 +37,6 @@ interface BTLabUtils {
 }
 
 declare namespace BTLabUtils {
-  interface ValidationErrorOptions {
-    [key: string]: any;
-  }
-
   /** Base class for errors specific to the application. */
   class BaseError extends Error {
     /** Indicates if error message can be exposed to an user. */
@@ -115,6 +116,80 @@ declare namespace BTLabUtils {
     /** Indicates whether request completed or failed. */
     ok?: boolean;
   }
+
+  class AbstractCollectionWithHistory<TSchema extends mongodb.Document = mongodb.Document> {
+    /**
+     * @param db Connection to the MongoDB instance.
+     */
+    constructor(db: mongodb.Db);
+    /**
+     * Returns document containing modification applied to the parent document.
+     * @param diff Partial document that contains changes to the parent document.
+     */
+    protected _makeHistoryDocument(diff: DocumentDiff): HistoryDocument;
+    /** Returns list of fields that should not be recorded in the history. */
+    protected _serviceFields(): string[];
+    /**
+     * @param author Information about an author of changes made to the document.
+     */
+    author(info: Fullname & { id: string }): this;
+    /** Returns a reference to a MongoDB Collection. */
+    collection(): mongodb.Collection<TSchema>;
+    /** Returns error instance. */
+    notFoundError(): RecordNotFoundError;
+    /**
+     * Replaces existing document with `newDocument` or inserts new one, if document with provided ID not found.
+     * @param newDocument Replacement document, must include `_id` field.
+     * @throws {RuntimeError}
+     */
+    replaceDocument(newDocument: TSchema): Promise<boolean>;
+    /**
+     * Updates deletion flag on existing document.
+     * @param id Unique identifier.
+     * @param state Set `true` to flag selected document as deleted.
+     * @throws {RecordNotFoundError}
+     */
+    updateDeletedField(id: any, state: boolean): Promise<boolean>;
+    /**
+     * Updates existing document using values in the `updateData`.
+     * @param id Unique identifier.
+     * @param updateData Partial document that contains new values for provided fields, or `null` for fields that need to be deleted.
+     * @throws {RecordNotFoundError}
+     * @throws {RuntimeError}
+     */
+    updateDocument(id: any, updateData: DocumentDiff): Promise<boolean>;
+  }
+  /** Partial document. */
+  interface DocumentDiff {
+    [key: string]: any;
+  }
+  /** Base interface for implementing document class. */
+  interface DocumentWithHistory extends mongodb.Document {
+    /** Primary key. */
+    _id: any;
+    /** Deletion flag. */
+    deleted?: boolean;
+    /** List of modification made to the document. */
+    history?: HistoryDocument[];
+  }
+  /** Name components. */
+  interface Fullname {
+    firstname: string;
+    lastname: string;
+    middlename?: string;
+  }
+  /** Schema of document for story update history of parent document. */
+  interface HistoryDocument extends mongodb.Document {
+    author?: Fullname | null;
+    user?: string | null;
+    date: Date;
+    diff: DocumentDiff;
+  }
+  /** Additional data supplied to a validation error. */
+  interface ValidationErrorOptions {
+    [key: string]: any;
+  }
+
 }
 
 declare const utils: BTLabUtils;

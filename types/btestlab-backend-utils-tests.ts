@@ -1,3 +1,5 @@
+import mongodb = require('mongodb');
+
 import utils = require('btestlab-backend-utils');
 
 const {
@@ -53,3 +55,14 @@ response.list = [
 ];
 response.message = 'message';
 response.ok = true;
+
+const { AbstractCollectionWithHistory } = utils.db;
+const collection = new AbstractCollectionWithHistory(new mongodb.MongoClient('connect').db());
+collection.author({
+  id: 'user id',
+  firstname: 'firstname',
+  lastname: 'lastname',
+  middlename: 'middlename',
+});
+collection.collection().find();
+throw collection.notFoundError();

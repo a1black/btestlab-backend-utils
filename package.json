@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
+    "dotenv": "^10.0.0",
     "dtslint": "^4.1.4",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
@@ -45,6 +46,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.0.6",
+    "mongodb": "^4.1.0",
     "pre-commit": "^1.2.2",
     "prettier": "^2.3.2"
   },
