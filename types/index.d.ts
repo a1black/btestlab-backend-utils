@@ -19,7 +19,7 @@ interface BTLabUtils {
      * @param value Object to filter.
      * @param callbackFn Function to test each value in the object, if not provided function removes empty values from the object.
      */
-    filterObject<T = {[key: string]: any}>(value: T, callbackFn?: (value: any) => boolean): T;
+    filterObject<T = {[key: string]: any}>(value: T, callbackFn?: (value: any, index?: any) => boolean): T;
     /**
      * Returns `true` if `value` is nullish or empty.
      * @param value Value to check.
@@ -70,11 +70,12 @@ declare namespace BTLabUtils {
     options: ValidationErrorOptions | undefined;
   }
 
-  class ServiceResponseBuilder<In = { [key: string]: any }, Out = { [key: string]: any }> {
+  /** Class for assembling RESTFul service response object. */
+  class ServiceResponseBuilder {
     /** Sets list of action that can be performed on the response document. */
     allow(...actions: string[]): this;
     /** Sets document or list of documents returned by the server. */
-    document(document: In | In[]): this;
+    document(document: any): this;
     /**
      * Sets error messages occured during validation of user's input.
      * @param error Error message.
@@ -90,38 +91,26 @@ declare namespace BTLabUtils {
     fail(): this;
     /** Sets list of action that cannot be performed on the response document. */
     forbid(...actions: string[]): this;
+    /** Sets list of changes made to the returned document. */
+    history(records?: HistoryDocument[]): this;
     /** Sets response message. */
     message(message: string): this;
     /** Returns response object. */
-    produce(): ServiceResponse<Out>;
+    produce(): ServiceResponse;
     /** Indicates that server successfully completed user's request. */
     success(): this;
     /** Sets access token issued by the authorization server. */
     token(token: string): this;
   }
 
-  interface ServiceResponse<Doc> {
-    /** Access token. */
-    accessToken?: string;
-    /** List of permitted operations on the response document(s). */
-    allowed?: string[];
-    /** Data returned by services that operate on a single document. */
-    doc?: Doc;
-    /** Validation errors. */
-    errors?: { [key: string]: any };
-    /** List of documents. */
-    list?: Array<{ actions?: string[], doc: Doc }>;
-    /** Response message. */
-    message?: string;
-    /** Indicates whether request completed or failed. */
-    ok?: boolean;
-  }
-
-  class AbstractCollectionWithHistory<TSchema extends mongodb.Document = mongodb.Document> {
+  /** Base for implementing collection with versioning of documents. */
+  class AbstractCollectionWithHistory<TSchema extends DocumentWithHistory = DocumentWithHistory> {
     /**
      * @param db Connection to the MongoDB instance.
      */
     constructor(db: mongodb.Db);
+    /** Connection to the database. */
+    protected _db: mongodb.Db;
     /**
      * Returns document containing modification applied to the parent document.
      * @param diff Partial document that contains changes to the parent document.
@@ -132,7 +121,7 @@ declare namespace BTLabUtils {
     /**
      * @param author Information about an author of changes made to the document.
      */
-    author(info: Fullname & { id: string }): this;
+    author(info: AuthorInfo): this;
     /** Returns a reference to a MongoDB Collection. */
     collection(): mongodb.Collection<TSchema>;
     /** Returns error instance. */
@@ -152,16 +141,23 @@ declare namespace BTLabUtils {
     updateDeletedField(id: any, state: boolean): Promise<boolean>;
     /**
      * Updates existing document using values in the `updateData`.
-     * @param partialDOcument Partial document that contains new values for provided fields, or `null` for fields that need to be deleted.
+     * @param partialDocument Partial document that contains new values for provided fields, or `null` for fields that need to be deleted.
      * @throws {RecordNotFoundError}
      * @throws {RuntimeError}
      */
-    updateDocument(partialDocument: TSchema): Promise<boolean>;
+    updateDocument(partialDocument: PartialDocument): Promise<boolean>;
   }
-  /** Partial document. */
+
+  /** Information about an author of changes made to the document. */
+  interface AuthorInfo extends Fullname {
+    id: string;
+  }
+
+  /** Difference between two documents. */
   interface DocumentDiff {
     [key: string]: any;
   }
+
   /** Base interface for implementing document class. */
   interface DocumentWithHistory extends mongodb.Document {
     /** Primary key. */
@@ -171,22 +167,57 @@ declare namespace BTLabUtils {
     /** List of modification made to the document. */
     history?: HistoryDocument[];
   }
+
   /** Name components. */
   interface Fullname {
     firstname: string;
     lastname: string;
     middlename?: string;
   }
+
   /** Schema of document for story update history of parent document. */
-  interface HistoryDocument extends mongodb.Document {
-    author?: Fullname | null;
-    user?: string | null;
+  interface HistoryDocument {
+    author?: Fullname;
     date: Date;
     diff: DocumentDiff;
+    user?: string;
   }
+
+  /** Partial document. */
+  interface PartialDocument extends mongodb.Document {
+    [key: string]: any;
+  }
+
+  /** Response object returned by the RESTFul service. */
+  interface ServiceResponse {
+    /** Access token. */
+    accessToken?: string;
+    /** List of permitted operations on the response document(s). */
+    allowed?: string[];
+    /** Data returned by services that operate on a single document. */
+    doc?: any;
+    /** Validation errors. */
+    errors?: { [key: string]: any };
+    /** Document update history. */
+    history?: any[];
+    /** List of documents. */
+    list?: any[];
+    /** Response message. */
+    message?: string;
+    /** Indicates whether request completed or failed. */
+    ok?: boolean;
+  }
+
   /** Additional data supplied to a validation error. */
   interface ValidationErrorOptions {
     [key: string]: any;
+  }
+}
+
+declare global {
+  namespace mongodb {
+    interface DocumentWithHistory extends BTLabUtils.DocumentWithHistory {}
+    interface PartialDocument extends BTLabUtils.PartialDocument {}
   }
 }
 

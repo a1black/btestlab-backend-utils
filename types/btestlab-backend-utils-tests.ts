@@ -18,20 +18,21 @@ new OperationNotAllowedError();
 new RecordNotFoundError('error');
 new RecordNotFoundError();
 new RuntimeError('error');
-new ValidationError('error', [['key', 'error']], { key: 'value' });
-new ValidationError('error', { key: 'value' });
 const validationError = new ValidationError('error');
 validationError.details = [['key', 'error'], ['key', 'error']];
 validationError.options = { key: 'value' };
+new ValidationError('error', [['key', 'error']], { key: 'value' });
+new ValidationError('error', { key: 'value' });
 
 const { filterObject, isEmpty, uid } = utils.misc;
-filterObject({empty: null, nonempty: 'value'}).nonempty = 'new value';
+filterObject({a: 1, b: 2}, (v, k) => v < 10 && k !== 'b').a = 2;
 filterObject({a: 1, b: NaN}, isNaN).b = 2;
+filterObject({a: null, b: 'value'}).b = 'new value';
 isEmpty('');
 uid(10);
 
 const { ServiceResponseBuilder } = utils.service;
-const response = new ServiceResponseBuilder<number, string>()
+const response = new ServiceResponseBuilder()
   .allow('create', 'read', 'update', 'delete')
   .document(1)
   .document([1, 2])
@@ -41,6 +42,18 @@ const response = new ServiceResponseBuilder<number, string>()
   .error('error', [['key', 'message']])
   .fail()
   .forbid('create', 'read', 'update', 'delete')
+  .history([
+    {
+      author: {
+        firstname: 'name',
+        lastname: 'name',
+        middlename: 'name'
+      },
+      date: new Date(),
+      diff: { deleted: true },
+      user: 'id'
+    }
+  ])
   .message('message')
   .success()
   .token('access token')
@@ -49,9 +62,10 @@ response.accessToken = 'token';
 response.allowed = ['create'];
 response.doc = 'document 1';
 response.errors = { key: 'message' };
+response.history = [{ date: new Date(), diff: { deleted: false } }];
 response.list = [
   { actions: ['update'], doc: 'document 1' },
-  { doc: 'document 2' }
+  { doc: 'document 2', history: [] }
 ];
 response.message = 'message';
 response.ok = true;
@@ -59,13 +73,13 @@ response.ok = true;
 const { AbstractCollectionWithHistory } = utils.db;
 const collection = new AbstractCollectionWithHistory(new mongodb.MongoClient('connect').db());
 collection.author({
-  id: 'user id',
   firstname: 'firstname',
+  id: 'user id',
   lastname: 'lastname',
   middlename: 'middlename',
 });
 collection.collection().find();
-throw collection.notFoundError();
 collection.replaceDocument({_id: 1, name: 2}).then(console.log);
 collection.updateDeletedField(1, true).then(console.log);
 collection.updateDocument({_id: 1, name: null}).then(console.log);
+throw collection.notFoundError();

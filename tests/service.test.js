@@ -77,6 +77,71 @@ describe('ServerResponseBuilder', () => {
     })
   })
 
+  test('history() with created record only, expect short history', () => {
+    const response = new ServerResponseBuilder()
+      .history([
+        {
+          author: 'author',
+          date: new Date(),
+          diff: { name: 'name' },
+          user: 'user'
+        }
+      ])
+      .produce()
+
+    expect(response.history).toEqual([
+      {
+        action: 'created',
+        author: 'author',
+        date: expect.any(Number),
+        user: 'user'
+      }
+    ])
+  })
+
+  test('history(), expect `history` property', () => {
+    const response = new ServerResponseBuilder()
+      .history([
+        {
+          author: 'author',
+          date: new Date(),
+          diff: { name: 'name', deleted: false, login: null },
+          user: 'user'
+        },
+        {
+          date: new Date(),
+          diff: { deleted: true }
+        },
+        {
+          date: new Date(),
+          diff: { name: null, login: 'login' },
+          user: 'user'
+        }
+      ])
+      .produce()
+
+    expect(response.history).toEqual([
+      {
+        action: 'created',
+        author: 'author',
+        date: expect.any(Number),
+        updates: { name: 'name', deleted: false },
+        user: 'user'
+      },
+      {
+        action: 'deleted',
+        date: expect.any(Number)
+      },
+      {
+        action: 'updated',
+        date: expect.any(Number),
+        deletions: ['name'],
+        updates: { login: 'login' },
+        user: 'user'
+      }
+    ])
+  })
+
   test('produce(), expect full response object', () => {
     expect(
       new ServerResponseBuilder()

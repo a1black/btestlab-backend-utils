@@ -3,6 +3,10 @@
 const { filterObject, isEmpty, uid } = require('../lib/functional')
 
 describe('filterObject(value, callbackFn)', () => {
+  test('nullish argument, expect TypeError', () => {
+    expect(() => filterObject(null)).toThrow(TypeError)
+  })
+
   test('default `callbackFn`, expect Object without empty values', () => {
     expect(
       filterObject({
@@ -21,9 +25,9 @@ describe('filterObject(value, callbackFn)', () => {
   test('all elements fail test, expect empty object', () => {
     const fn = jest.fn().mockReturnValue(false)
     expect(filterObject({ key1: 1, key2: 2, key3: 3 }, fn)).toEqual({})
-    expect(fn).toHaveBeenNthCalledWith(1, 1)
-    expect(fn).toHaveBeenNthCalledWith(2, 2)
-    expect(fn).toHaveBeenNthCalledWith(3, 3)
+    expect(fn).toHaveBeenNthCalledWith(1, 1, 'key1')
+    expect(fn).toHaveBeenNthCalledWith(2, 2, 'key2')
+    expect(fn).toHaveBeenNthCalledWith(3, 3, 'key3')
   })
 
   test('all elements passed test, expect copy of input', () => {
@@ -32,9 +36,9 @@ describe('filterObject(value, callbackFn)', () => {
     const filtered = filterObject(input, fn)
     expect(filtered).not.toBe(input)
     expect(filtered).toEqual(input)
-    expect(fn).toHaveBeenNthCalledWith(1, 1)
-    expect(fn).toHaveBeenNthCalledWith(2, 2)
-    expect(fn).toHaveBeenNthCalledWith(3, 3)
+    expect(fn).toHaveBeenNthCalledWith(1, 1, 'key1')
+    expect(fn).toHaveBeenNthCalledWith(2, 2, 'key2')
+    expect(fn).toHaveBeenNthCalledWith(3, 3, 'key3')
   })
 })
 
