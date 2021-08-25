@@ -145,7 +145,7 @@ declare namespace BTLabUtils {
      * @throws {RecordNotFoundError}
      * @throws {RuntimeError}
      */
-    updateDocument(partialDocument: PartialDocument): Promise<boolean>;
+    updateDocument(partialDocument: mongodb.Document): Promise<boolean>;
   }
 
   /** Information about an author of changes made to the document. */
@@ -183,11 +183,6 @@ declare namespace BTLabUtils {
     user?: string;
   }
 
-  /** Partial document. */
-  interface PartialDocument extends mongodb.Document {
-    [key: string]: any;
-  }
-
   /** Response object returned by the RESTFul service. */
   interface ServiceResponse {
     /** Access token. */
@@ -215,10 +210,7 @@ declare namespace BTLabUtils {
 }
 
 declare global {
-  namespace mongodb {
-    interface DocumentWithHistory extends BTLabUtils.DocumentWithHistory {}
-    interface PartialDocument extends BTLabUtils.PartialDocument {}
-  }
+  interface DocumentWithHistory extends BTLabUtils.DocumentWithHistory {}
 }
 
 declare const utils: BTLabUtils;
